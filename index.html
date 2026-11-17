@@ -873,7 +873,7 @@ function tally(){
 }
 function winGame(){ // every boss beaten
   if(G.phase==='gameover'||G.phase==='initials')return;
-  G.won=true;G.bonus=G.hp*1000*(G.type+1);G.score+=G.bonus;
+  G.won=true;G.prog=1;G.overT=0;G.bonus=G.hp*1000*(G.type+1);G.score+=G.bonus;
   G.qual=scores.length<5||G.score>scores[scores.length-1].s;
   G.phase='gameover';G.t=3;G.items=[];G.boss=null;G.eggsOut=[];G.mobs=[];G.flip=0;G.bullets=[];G.hunters=[];G.rage=false;G.msg=null;
   G.extra={kind:'victory',x:128,t:0,hat:hatSpr.gary};
@@ -882,6 +882,9 @@ function winGame(){ // every boss beaten
 }
 function gameOver(){
   if(G.phase==='gameover'||G.phase==='initials')return;
+  {let f=.75*Math.min(1,G.idx/10); // how far through this level: hunters are the first 3/4, the boss the rest
+   if(G.phase==='boss'&&G.boss)f=.75+.25*(1-clamp(G.boss.hp/G.boss.maxHp,0,1))*.96;else if(G.phase==='bossIntro'||G.phase==='boss')f=.75;
+   G.prog=clamp((G.round-1+f)/BOSS.length,0,.995);G.overT=0;}
   G.qual=G.score>0&&(scores.length<5||G.score>scores[scores.length-1].s);
   G.phase='gameover';G.t=1.8;G.items=[];G.boss=null;G.eggsOut=[];G.mobs=[];G.flip=0;G.extra={kind:'laugh',x:128,t:0};G.bullets=[];G.hunters=[];G.newTop=false;
   if(G.score>topScore){topScore=G.score;saveTop();G.newTop=true;}
@@ -996,7 +999,7 @@ function updPlay(dt){
         G.regen2+=dt;if(G.regen2>7){G.regen2=0;if(G.eggs<3)G.eggs++;}}
       break;
     case 'bossEnd':G.t-=dt;if(G.t<=0){if(G.round>=BOSS.length)winGame();else{G.extra=null;G.round++;newRound();}}break;
-    case 'gameover':G.t-=dt;break;
+    case 'gameover':if(G.overT<1.8&&Math.floor(G.overT*14)!==Math.floor((G.overT+dt)*14))tone(300+G.prog*Math.min(1,G.overT/1.8)*900,.03,{vol:.03});G.t-=dt;G.overT+=dt;break;
   }
 }
 function update(dt){
@@ -1117,10 +1120,26 @@ function drawExtra(){
     if(rise>=1&&Math.floor(e.t*4)%2)txt('♪',e.x-16,y-18,'#fcfcfc');
   }
 }
+function drawProgress(){ // how far the duck got: a track with the ten bosses along it
+  const N=BOSS.length,x0=30,x1=224,ty=150,k=Math.min(1,G.overT/1.8),e=1-Math.pow(1-k,3),pos=G.prog*e,dx=Math.round(x0+pos*(x1-x0));
+  box(16,110,224,48);
+  const at=Math.min(N,Math.floor(pos*N)+1);
+  txt(G.won&&k>=1?'THE POND IS SAFE! 10/10':'REACHED LEVEL '+at+' OF '+N,128,115,G.won?'#7cfc3c':'#fcfcfc',8,'center');
+  if(k>=1&&!G.won)txt('VS '+BOSS[at-1],128,125,'#a8a8a8',8,'center');
+  ctx.fillStyle='#5c5c5c';ctx.fillRect(x0,ty,x1-x0,2);
+  ctx.fillStyle=G.won?'#7cfc3c':'#fcfc3c';ctx.fillRect(x0,ty,dx-x0,2);
+  ctx.fillStyle='#fcfcfc';ctx.fillRect(x0-1,ty-3,2,8);
+  for(let i=0;i<N;i++){const nx=Math.round(x0+(i+1)/N*(x1-x0)),beat=pos>=(i+1)/N-.0001;
+    if(beat){ctx.fillStyle='#d82800';ctx.fillRect(nx-3,ty-2,6,6);ctx.fillStyle='#fcfcfc';ctx.fillRect(nx-2,ty-1,1,1);ctx.fillRect(nx+1,ty-1,1,1);ctx.fillRect(nx-1,ty,2,2);ctx.fillRect(nx-2,ty+2,1,1);ctx.fillRect(nx+1,ty+2,1,1);}
+    else{ctx.fillStyle='#000';ctx.fillRect(nx-3,ty-2,6,6);ctx.fillStyle=i===N-1?'#fcfc3c':'#a8a8a8';ctx.fillRect(nx-2,ty-1,4,4);ctx.fillStyle='#000';ctx.fillRect(nx-1,ty,2,2);}}
+  const fr=k<1?[0,1,2,1][Math.floor(clock*12)%4]:1;
+  if(k>=1&&!G.won){ctx.save();ctx.translate(dx,ty-7);ctx.rotate(Math.PI);ctx.drawImage(duckR[1],-11,-8);ctx.restore();}
+  else ctx.drawImage(duckR[fr],dx-12,ty-17);
+}
 function drawHUD(){
-  txt('R='+G.round,12,202,'#7cfc3c');
-  ctx.drawImage(eggSpr,48,203);txt('x'+G.eggs,54,202,G.eggs?'#fcfcfc':'#7c7c7c',8,'left','#000');
-  ctx.drawImage(boltSpr,82,203);txt('x'+G.zaps,88,202,G.zaps?'#fcfc3c':'#7c7c7c',8,'left','#000');
+  txt('LV '+G.round+'/'+BOSS.length,10,202,'#7cfc3c',8,'left','#000');
+  ctx.drawImage(eggSpr,78,203);txt('x'+G.eggs,84,202,G.eggs?'#fcfcfc':'#7c7c7c',8,'left','#000');
+  ctx.drawImage(boltSpr,110,203);txt('x'+G.zaps,116,202,G.zaps?'#fcfc3c':'#7c7c7c',8,'left','#000');
   if(G.rage&&G.phase==='wave'&&Math.floor(clock*4)%2)txt('ENRAGED!',W-4,202,'#fc3c3c',8,'right','#000');
   box(8,211,46,28);{const n=ammo(G.wpn),sp=[shellSpr,eggSpr,boltSpr][G.wpn];
     if(n<=4)for(let i=0;i<n;i++)ctx.drawImage(sp,15+i*8,216);else{ctx.drawImage(sp,15,216);txt('x'+n,22,216,'#fcfcfc');}
@@ -1208,16 +1227,16 @@ function drawPlay(){
   if(G.phase==='tally'){box(56,62,144,56);txt('HITS  '+G.hits+'/10',128,71,'#fcfcfc',8,'center');
     txt(G.perfect?'PERFECT!!':G.pass?'NICE FLYING!':'FOWL PLAY...',128,87,G.perfect?'#fcfc3c':G.pass?'#7cfc3c':'#fc3c3c',8,'center');
     txt(G.perfect?'+10000':G.pass?'FEATHER +1':'NEEDED '+quota(G.round),128,103,'#fcfcfc',8,'center');}
-  if(G.phase==='gameover'&&G.won){
-    txt('YOU WIN!',128,14,Math.floor(clock*6)%2?'#fcfc3c':'#fcfcfc',16,'center','#000');
-    txt('A WINNER IS YOU',128,140,'#fcfcfc',8,'center','#000');
-    txt('FEATHER BONUS +'+G.bonus,128,152,'#7cfc3c',8,'center','#000');}
-  if(G.phase==='gameover'){box(40,42,176,94);txt(G.won?'THE POND IS SAFE!':'GAME OVER',128,50,G.won?'#7cfc3c':'#fc3c3c',8,'center');
-    txt('SCORE '+String(G.score).padStart(6,'0'),128,64,'#fcfcfc',8,'center');
-    const st=G.stats;txt('ACCURACY '+(st.shots?Math.round(100*st.hits/st.shots):0)+'%',128,78,'#bcbcbc',8,'center');
-    txt('STABS '+st.knife+'  MAX x'+st.best,128,90,'#bcbcbc',8,'center');
-    txt(rank(G.score),128,104,'#fcfc3c',8,'center');
-    if(G.t<=0&&Math.floor(clock*2)%2)txt(G.qual?'HIGH SCORE! CLICK':'CLICK TO CONTINUE',128,120,'#7cfc3c',8,'center');}
+  if(G.phase==='gameover'){
+    box(40,18,176,92);
+    txt(G.won?'YOU WIN!':'GAME OVER',128,25,G.won?(Math.floor(clock*6)%2?'#fcfc3c':'#fcfcfc'):'#fc3c3c',8,'center');
+    txt('SCORE '+String(G.score).padStart(6,'0'),128,38,'#fcfcfc',8,'center');
+    const st=G.stats;txt('ACCURACY '+(st.shots?Math.round(100*st.hits/st.shots):0)+'%',128,51,'#bcbcbc',8,'center');
+    txt('STABS '+st.knife+'  MAX x'+st.best,128,63,'#bcbcbc',8,'center');
+    txt(rank(G.score),128,76,'#fcfc3c',8,'center');
+    if(G.t<=0&&Math.floor(clock*2)%2)txt(G.qual?'HIGH SCORE! CLICK':'CLICK TO CONTINUE',128,94,'#7cfc3c',8,'center');
+    drawProgress();
+    if(G.won){txt('A WINNER IS YOU',128,164,'#fcfcfc',8,'center','#000');txt('FEATHER BONUS +'+G.bonus,128,176,'#7cfc3c',8,'center','#000');}}
   if(G.phase==='initials'){box(40,48,176,84);txt('NEW HIGH SCORE!',128,56,'#fcfc3c',8,'center');
     txt('ENTER YOUR INITIALS',128,70,'#fcfcfc',8,'center');
     for(let i=0;i<3;i++){const x=104+i*24;txt(String.fromCharCode(65+G.ini[i]),x,86,'#fcfcfc',16,'center');
