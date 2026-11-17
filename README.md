@@ -12,6 +12,7 @@ field, shoot the hunters, or swoop in with the knife.
 | Fly | Arrow keys or WASD | D-pad |
 | Fire current weapon | Click | A button, or tap the screen |
 | Knife dive (45° the way the duck faces) | Space or right-click | B button |
+| Drop an egg bomb | E | EGG |
 | Switch weapon | Q, 1/2/3 or mouse wheel | WEAPON |
 | Pause | P | PAUSE |
 | Mute / CRT lines / Zapper flash | M / C / F | |
@@ -26,7 +27,10 @@ field, shoot the hunters, or swoop in with the knife.
   Ron (jetpack).
 - Weapons: shotgun, egg bombs (blast, beats shields) and a zapper beam that goes
   through everyone in its line.
-- Bosses rotate: Big Rig Randy, Chopper Chuck and Mecha-Earl 9000.
+- Bosses rotate: Big Rig Randy, Chopper Chuck, Mecha-Earl 9000 and B-2 Bomber Bob
+  (homing missiles that give up after 3 seconds). They aim smarter in later rounds.
+- Running away doesn't help: hunters sprint and fire faster, and bosses go into a
+  short turbo charge.
 - The camera pulls the duck back to the centre: the further out you fly, the faster
   the world scrolls.
 - Chain hits for a combo multiplier, and pop balloons for hearts, ammo, a shield or
