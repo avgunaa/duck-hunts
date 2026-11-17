@@ -19,6 +19,8 @@ field, shoot the hunters, or swoop in with the knife.
 
 ## How it works
 
+- Pick Easy, Medium or Hard. Harder modes start with more hunters at once and have
+  tougher, faster, better-aiming bosses.
 - Each round has 10 hunters. Hit enough of them to meet the quota, then beat the boss
   to move on.
 - Later rounds scroll faster and send more hunters at once (up to 5).
