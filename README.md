@@ -29,8 +29,10 @@ field, shoot the hunters, or swoop in with the knife.
   Ron (jetpack).
 - Weapons: shotgun, egg bombs (blast, beats shields) and a zapper beam that goes
   through everyone in its line.
-- Bosses rotate: Big Rig Randy, Chopper Chuck, Mecha-Earl 9000 and B-2 Bomber Bob
-  (homing missiles that give up after 3 seconds). They aim smarter in later rounds.
+- There are 10 levels, each ending in a boss: Big Rig Randy, Chopper Chuck,
+  Mecha-Earl 9000, B-2 Bomber Bob, The Trojan Decoy, Bass Boat Bill, the Hunt-Mart
+  Blimp, Sergeant Blind, Ma, and The Kid with the Light Gun. Beat all ten to win.
+- Bosses aim smarter in later levels and on harder difficulties.
 - Running away doesn't help: hunters sprint and fire faster, and bosses go into a
   short turbo charge.
 - The camera pulls the duck back to the centre: the further out you fly, the faster
